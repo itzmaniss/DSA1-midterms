@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Meta data -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="Author" content="itzmaniss" />
+        <meta
+            name="Description"
+            content="This webpage is a poetry assistant, that will help you find rhymes and suggest words for your poems"
+        />
+
+        <!-- Local files -->
+        <link rel="icon" type="image/x-icon" href="/public/favicon.ico" />
+
+        <!-- Inline Styles -->
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family:
+                    "Permanent Marker",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                padding: 40px;
+            }
+
+            header {
+                text-align: center;
+                margin-bottom: 40px;
+                padding-bottom: 20px;
+                border-bottom: 3px solid #667eea;
+            }
+
+            header h1 {
+                font-size: 3rem;
+                color: #667eea;
+                margin-bottom: 10px;
+            }
+
+            header p {
+                font-size: 1.2rem;
+                color: #666;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 60px 20px;
+            }
+
+            .loading p {
+                font-size: 1.5rem;
+                color: #667eea;
+                margin-bottom: 20px;
+            }
+
+            .spinner {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .input-section {
+                text-align: center;
+                margin-bottom: 40px;
+                padding: 30px;
+                background: #f8f9fa;
+                border-radius: 15px;
+            }
+
+            .input-section label {
+                display: block;
+                font-size: 1.3rem;
+                color: #333;
+                margin-bottom: 15px;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .input-section input {
+                width: 60%;
+                padding: 15px 20px;
+                font-size: 1.2rem;
+                border: 2px solid #667eea;
+                border-radius: 10px;
+                outline: none;
+                transition: all 0.3s;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .input-section input:focus {
+                border-color: #764ba2;
+                box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            }
+
+            .input-section button {
+                margin-left: 10px;
+                padding: 15px 30px;
+                font-size: 1.2rem;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: transform 0.2s;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .input-section button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+            .results-section {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+
+            .result-box {
+                background: #f8f9fa;
+                padding: 25px;
+                border-radius: 15px;
+                border: 2px solid #e0e0e0;
+                transition: all 0.3s;
+            }
+
+            .result-box:hover {
+                border-color: #667eea;
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            }
+
+            .result-box h3 {
+                font-size: 1.5rem;
+                color: #667eea;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .result-content {
+                min-height: 100px;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .placeholder {
+                color: #999;
+                font-style: italic;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .syllable-count {
+                font-size: 2rem;
+                color: #667eea;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .word-tag {
+                display: inline-block;
+                background: #667eea;
+                color: white;
+                padding: 8px 15px;
+                margin: 5px;
+                border-radius: 20px;
+                font-size: 1rem;
+                transition: all 0.2s;
+            }
+
+            .word-tag:hover {
+                background: #764ba2;
+                transform: scale(1.05);
+            }
+
+            .no-results {
+                color: #999;
+                text-align: center;
+                font-style: italic;
+                padding: 20px;
+            }
+
+            .stats-section {
+                background: #f8f9fa;
+                padding: 25px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+            }
+
+            .stats-section h3 {
+                font-size: 1.5rem;
+                color: #667eea;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .stats-content {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .stat-item {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                border: 1px solid #e0e0e0;
+            }
+
+            .stat-item strong {
+                color: #667eea;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            footer {
+                text-align: center;
+                padding-top: 20px;
+                border-top: 2px solid #e0e0e0;
+                color: #666;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .error {
+                color: #d32f2f;
+                font-size: 1.2rem;
+                text-align: center;
+                padding: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    padding: 20px;
+                }
+
+                header h1 {
+                    font-size: 2rem;
+                }
+
+                .input-section input {
+                    width: 100%;
+                    margin-bottom: 10px;
+                }
+
+                .input-section button {
+                    margin-left: 0;
+                    width: 100%;
+                }
+
+                .results-section {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+
+        <!-- Required JS scripts - load in correct order -->
+        <script src="hashTable.js"></script>
+        <script src="utils.js"></script>
+        <script src="allliteration.js"></script>
+        <script src="rhymeScorer.js"></script>
+        <script src="buildAssistant.js"></script>
+        <script src="index.js"></script>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap"
+            rel="stylesheet"
+        />
+        <title>Poetry Assistant</title>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>🎭 Poetry Assistant</h1>
+                <p>
+                    Find rhymes, count syllables, and get word suggestions for
+                    your poetry
+                </p>
+            </header>
+
+            <main>
+                <!-- Loading indicator -->
+                <div id="loading" class="loading">
+                    <p>Loading word list...</p>
+                    <div class="spinner"></div>
+                </div>
+
+                <!-- Main interface (hidden until loaded) -->
+                <div id="main-interface" class="hidden">
+                    <!-- Input section -->
+                    <section class="input-section">
+                        <label for="word-input">Enter a word:</label>
+                        <input
+                            type="text"
+                            id="word-input"
+                            placeholder="e.g., dream, fire, star"
+                            autocomplete="off"
+                        />
+                        <button id="search-btn" onclick="searchWord()">
+                            Find Rhymes
+                        </button>
+                    </section>
+
+                    <!-- Results section -->
+                    <section class="results-section">
+                        <!-- Syllable count -->
+                        <div class="result-box">
+                            <h3>Syllable Count</h3>
+                            <div id="syllable-result" class="result-content">
+                                <p class="placeholder">
+                                    Enter a word to see syllable count
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Rhymes -->
+                        <div class="result-box">
+                            <h3>🎵 Rhyming Words</h3>
+                            <div id="rhymes-result" class="result-content">
+                                <p class="placeholder">
+                                    Enter a word to find rhymes
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Alliterations -->
+                        <div class="result-box">
+                            <h3>✨ Alliterative Words</h3>
+                            <div
+                                id="alliteration-result"
+                                class="result-content"
+                            >
+                                <p class="placeholder">
+                                    Enter a word to find alliterations
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Statistics -->
+                    <section class="stats-section">
+                        <h3>Dictionary Statistics</h3>
+                        <div id="stats" class="stats-content"></div>
+                    </section>
+                </div>
+            </main>
+
+            <footer>
+                <p>
+                    Built by itzmaniss for Algorithms & Data Structures course
+                </p>
+            </footer>
+        </div>
+
+        <!-- Main application script -->
+        <script>
+            let assistant = null;
+
+            // Load the poetry assistant when page loads
+            window.addEventListener("DOMContentLoaded", async function () {
+                try {
+                    console.log("Loading poetry assistant...");
+                    assistant = await buildPoetryAssistantFromFile(
+                        "./wordlist.txt",
+                        3,
+                    );
+
+                    if (assistant) {
+                        // Hide loading, show interface
+                        document
+                            .getElementById("loading")
+                            .classList.add("hidden");
+                        document
+                            .getElementById("main-interface")
+                            .classList.remove("hidden");
+
+                        // Display statistics
+                        displayStats(assistant.stats);
+
+                        console.log("Poetry assistant loaded successfully!");
+                    } else {
+                        showError(
+                            "Failed to load word list. Please check if wordlist.txt exists.",
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error loading poetry assistant:", error);
+                    showError("Error loading word list: " + error.message);
+                }
+            });
+
+            // Search for rhymes and word suggestions
+            function searchWord() {
+                const input = document.getElementById("word-input");
+                const word = input.value.trim().toLowerCase();
+
+                if (!word) {
+                    alert("Please enter a word");
+                    return;
+                }
+
+                if (!assistant) {
+                    alert("Poetry assistant is still loading. Please wait.");
+                    return;
+                }
+
+                try {
+                    // Query the poetry assistant
+                    const results = query(assistant, word, 3);
+
+                    // Display results
+                    displaySyllables(results.syllables);
+                    displayRhymes(results.rhymes);
+                    displayAlliterations(results.alliterations);
+                } catch (error) {
+                    console.error("Search error:", error);
+                    alert("Error searching for word: " + error.message);
+                }
+            }
+
+            // Display syllable count
+            function displaySyllables(count) {
+                const div = document.getElementById("syllable-result");
+                div.innerHTML = `<p class="syllable-count">${count} syllable${count !== 1 ? "s" : ""}</p>`;
+            }
+
+            // Display rhyming words
+            function displayRhymes(rhymes) {
+                const div = document.getElementById("rhymes-result");
+                if (rhymes.length === 0) {
+                    div.innerHTML = '<p class="no-results">No rhymes found</p>';
+                    return;
+                }
+
+                const wordsList = rhymes
+                    .map((word) => `<span class="word-tag">${word}</span>`)
+                    .join(" ");
+                div.innerHTML = wordsList;
+            }
+
+            // Display alliterative words
+            function displayAlliterations(alliterations) {
+                const div = document.getElementById("alliteration-result");
+                if (alliterations.length === 0) {
+                    div.innerHTML =
+                        '<p class="no-results">No alliterations found</p>';
+                    return;
+                }
+
+                const wordsList = alliterations
+                    .map((word) => `<span class="word-tag">${word}</span>`)
+                    .join(" ");
+                div.innerHTML = wordsList;
+            }
+
+            // Display statistics
+            function displayStats(stats) {
+                const div = document.getElementById("stats");
+                div.innerHTML = `
+                    <div class="stat-item">
+                        <strong>Total Words:</strong> ${stats.wordCount.toLocaleString()}
+                    </div>
+                    <div class="stat-item">
+                        <strong>Unique Rhyme Suffixes:</strong> ${stats.rhymeTableCount.toLocaleString()}
+                    </div>
+                    <div class="stat-item">
+                        <strong>Hash Table Load Factor:</strong> ${stats.rhymeTableLoadFactor.toFixed(4)}
+                    </div>
+                    <div class="stat-item">
+                        <strong>Phonetic Keys:</strong> ${stats.phoneticTableCount.toLocaleString()}
+                    </div>
+                `;
+            }
+
+            // Show error message
+            function showError(message) {
+                const loading = document.getElementById("loading");
+                loading.innerHTML = `<p class="error">${message}</p>`;
+            }
+
+            // Allow Enter key to trigger search
+            document.addEventListener("DOMContentLoaded", function () {
+                const input = document.getElementById("word-input");
+                if (input) {
+                    input.addEventListener("keypress", function (e) {
+                        if (e.key === "Enter") {
+                            searchWord();
+                        }
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>
