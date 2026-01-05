@@ -231,4 +231,6 @@ Educational project for data structures and algorithms coursework.
 
 ## Authors
 
-Data Structures and Algorithms Project - 2026
+itzmaniss
+
+**README WRITTEN BY CLAUDE AI**
